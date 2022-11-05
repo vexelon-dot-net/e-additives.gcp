@@ -9,13 +9,11 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/vexelon-dot-net/e-additives.gcp/config"
+	"github.com/vexelon-dot-net/e-additives.gcp/service"
 )
 
 const (
-	DEFAULT_PORT         = 7095
-	DEFAULT_REFRESH_MINS = 60 * 24
-	HEART                = "\u2764"
-	PROJECT_ID           = ""
+	HEART = "\u2764"
 )
 
 var (
@@ -92,13 +90,10 @@ func main() {
 	fmt.Printf("%s e-additives API service v%s %s\n\n", HEART, config.VERSION, HEART)
 
 	if err := config.ParseConfig(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Config error: %v\n", err)
 	}
 
-	http.HandleFunc("/api", indexHandler)
-
-	log.Printf("Listening on port %d", config.ListenPort)
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.ListenPort), nil); err != nil {
-		log.Fatal(err)
+	if err := service.ServeNow(); err != nil {
+		log.Fatalf("Server error: %v\n", err)
 	}
 }
