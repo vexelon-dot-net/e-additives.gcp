@@ -3,7 +3,7 @@ runtime: go116
 service: default
 
 env_variables:
-  EAD_LISTEN_PORT: 8080
+  DB_PATH: ./data/eadditives.sqlite3
 
 handlers:
 - url: /

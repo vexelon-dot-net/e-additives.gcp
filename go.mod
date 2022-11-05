@@ -1,4 +1,4 @@
-module github.com/petarov/rabattcodes
+module github.com/vexelon-dot-net/e-additives.gcp
 
 go 1.18
 

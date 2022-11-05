@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/vexelon-dot-net/e-additives.gcp/config"
 )
 
 const (
@@ -89,16 +89,16 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/api", indexHandler)
+	fmt.Printf("%s e-additives API service v%s %s\n\n", HEART, config.VERSION, HEART)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-		log.Printf("Defaulting to port %s", port)
+	if err := config.ParseConfig(); err != nil {
+		log.Fatal(err)
 	}
 
-	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+	http.HandleFunc("/api", indexHandler)
+
+	log.Printf("Listening on port %d", config.ListenPort)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", config.ListenPort), nil); err != nil {
 		log.Fatal(err)
 	}
 }
