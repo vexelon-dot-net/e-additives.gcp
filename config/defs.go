@@ -7,6 +7,8 @@ import (
 )
 
 var (
+	// server listen address
+	ListenAddress string
 	// server listen port
 	ListenPort int
 	// path to the sqlite database
@@ -33,6 +35,11 @@ func ParseConfig() error {
 		return fmt.Errorf("Cannot find env `PORT`!")
 	}
 	ListenPort, _ = strconv.Atoi(value)
+
+	ListenAddress, isPresent = os.LookupEnv("HOST")
+	if !isPresent {
+		ListenAddress = "" // default IPv6
+	}
 
 	DatabasePath, isPresent = os.LookupEnv("DB_PATH")
 	if !isPresent {
