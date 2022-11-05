@@ -93,7 +93,7 @@ func main() {
 		log.Fatalf("Config error: %v\n", err)
 	}
 
-	if err := service.ServeNow(); err != nil {
+	if err := service.Start(); err != nil {
 		log.Fatalf("Server error: %v\n", err)
 	}
 }

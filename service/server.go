@@ -13,11 +13,11 @@ type ServerContext struct {
 	// workerPool *WokerPool
 }
 
-func ServeNow() (err error) {
+func Start() (err error) {
 	ctx := new(ServerContext)
 	ctx.router = http.NewServeMux()
 
-	if err = db.InitEadDb(config.DatabasePath); err != nil {
+	if err = db.Open(config.DatabasePath); err != nil {
 		return err
 	}
 
