@@ -39,7 +39,7 @@ var (
 
 // indexHandler responds to requests with our greeting.
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
+	if r.URL.Path != "/api" {
 		http.NotFound(w, r)
 		return
 	}
@@ -89,7 +89,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/api", indexHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -98,7 +98,7 @@ func main() {
 	}
 
 	log.Printf("Listening on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		log.Fatal(err)
 	}
 }
