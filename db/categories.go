@@ -67,3 +67,20 @@ func FetchAllCategories(loc Locale) ([]*AdditiveCategory, error) {
 
 	return cats, nil
 }
+
+func FetchOneCategory(catId int, loc Locale) (*AdditiveCategory, error) {
+	cat := new(AdditiveCategory)
+
+	err := cat.ScanFrom(db.QueryRow(`
+		SELECT c.id, p.name, p.description, p.last_update,
+		(SELECT COUNT(id) FROM ead_Additive as a WHERE a.category_id=c.id) as additives
+		FROM ead_AdditiveCategory as c
+		LEFT JOIN ead_AdditiveCategoryProps as p ON p.category_id = c.id
+		WHERE c.id = $1 AND p.locale_id = $2
+	`, catId, loc.Id))
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching single category '%d': %w", catId, err)
+	}
+
+	return cat, nil
+}
