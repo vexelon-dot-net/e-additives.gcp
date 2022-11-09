@@ -38,35 +38,19 @@ func attachApi(serverCtx *ServerContext) {
 	api.ctx.router.HandleFunc(API_CATEGORIES+"/", api.handleCategories())
 }
 
-func (api *Api) handleIndex() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		routes := map[string]string{
-			API_INDEX:      "Fetches this list of junctions",
-			API_LOCALES:    "Fetches list of locales",
-			API_CATEGORIES: "Fetches list of additive categories",
-			// API_DEVICES + "/:product":        "Fetches a single Apple device by product name",
-			// API_DEVICES + "/search?key=:key": "Fetches a list of devices given a key parameter",
-			// API_UPDATES + "/:product":        "Fetches device updates by product name",
+func getIdParam(r *http.Request, junction string) (int, error) {
+	parsed := strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, junction), "/")
+	if len(parsed) > 0 {
+		id, err := strconv.Atoi(parsed)
+		if err != nil {
+			return 0, fmt.Errorf("Error parsing '%s': %w", parsed, err)
 		}
-		resp, _ := json.Marshal(routes)
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(resp)
+		return id, nil
 	}
+	return 0, nil
 }
 
-func (w *MyResponseWriter) writeJson(data interface{}) {
-	resp, _ := json.Marshal(data)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(resp)
-}
-
-func writeJson(w http.ResponseWriter, data interface{}) {
-	resp, _ := json.Marshal(data)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(resp)
-}
-
-func writeError(w http.ResponseWriter, err error) {
+func (w *MyResponseWriter) writeError(err error) {
 	if errors.Is(err, strconv.ErrSyntax) {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Printf("Error: %v\n", err)
@@ -82,20 +66,29 @@ func writeError(w http.ResponseWriter, err error) {
 	}
 }
 
-func getIdParam(r *http.Request, junction string) (int, error) {
-	parsed := strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, junction), "/")
-	if len(parsed) > 0 {
-		id, err := strconv.Atoi(parsed)
-		if err != nil {
-			return 0, fmt.Errorf("Error parsing '%s': %w", parsed, err)
+func (w *MyResponseWriter) writeJson(data interface{}) {
+	resp, _ := json.Marshal(data)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resp)
+}
+
+func (api *Api) handleIndex() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		writer := &MyResponseWriter{w}
+		routes := map[string]string{
+			API_INDEX:               "Fetches this list of junctions",
+			API_LOCALES:             "Fetches list of locales",
+			API_CATEGORIES:          "Fetches list of additive categories",
+			API_CATEGORIES + "/:id": "Fetches a single additive category by id",
+			// API_DEVICES + "/search?key=:key": "Fetches a list of devices given a key parameter",
 		}
-		return id, nil
+		writer.writeJson(routes)
 	}
-	return 0, nil
 }
 
 func (api *Api) handleLocales() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(_w http.ResponseWriter, r *http.Request) {
+		w := &MyResponseWriter{_w}
 		// product := strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, API_LOCALES), "/")
 		// if len(product) > 0 {
 
@@ -115,26 +108,27 @@ func (api *Api) handleLocales() http.HandlerFunc {
 
 		locales, err := db.FetchAllLocales()
 		if err != nil {
-			writeError(w, err)
+			w.writeError(err)
 		} else {
-			writeJson(w, locales)
+			w.writeJson(locales)
 		}
 		// }
 	}
 }
 
 func (api *Api) handleCategories() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(_w http.ResponseWriter, r *http.Request) {
+		w := &MyResponseWriter{_w}
 		id, err := getIdParam(r, API_CATEGORIES)
 		if err != nil {
-			writeError(w, err)
+			w.writeError(err)
 			return
 		}
 
 		// TODO
 		locales, err := db.FetchAllLocales()
 		if err != nil {
-			writeError(w, err)
+			w.writeError(err)
 			return
 		}
 		loc := *locales[1]
@@ -142,17 +136,17 @@ func (api *Api) handleCategories() http.HandlerFunc {
 		if id > 0 {
 			cat, err := db.FetchOneCategory(id, loc)
 			if err != nil {
-				writeError(w, err)
+				w.writeError(err)
 			} else {
-				writeJson(w, cat)
+				w.writeJson(cat)
 			}
 		} else {
+			// TODO: decorate add urls for each item
 			categories, err := db.FetchAllCategories(loc)
 			if err != nil {
-				writeError(w, err)
+				w.writeError(err)
 			} else {
-				(&MyResponseWriter{w}).writeJson(categories)
-				writeJson(w, categories)
+				w.writeJson(categories)
 			}
 		}
 	}
