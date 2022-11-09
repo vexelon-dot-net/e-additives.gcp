@@ -14,12 +14,13 @@ func main() {
 
 	fmt.Printf("%s e-additives API service v%s %s\n\n", HEART, config.VERSION, HEART)
 
-	if err := config.ParseConfig(); err != nil {
+	cfg, err := config.CreateFromEnv()
+	if err != nil {
 		log.Fatalf("Config error: %v\n", err)
 	}
 
-	server := service.NewServer()
-	if err := server.Start(); err != nil {
+	server := service.NewServer(cfg)
+	if err := server.Run(); err != nil {
 		log.Fatalf("Server error: %v\n", err)
 	}
 }

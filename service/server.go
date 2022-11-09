@@ -9,26 +9,30 @@ import (
 )
 
 type ServerContext struct {
+	config *config.Config
 	router *http.ServeMux
 	// workerPool *WokerPool
 }
 
-func NewServer() *ServerContext {
-	return &ServerContext{http.NewServeMux()}
+func NewServer(config *config.Config) *ServerContext {
+	return &ServerContext{
+		config,
+		http.NewServeMux(),
+	}
 }
 
-func (sc *ServerContext) Start() (err error) {
-	if err = db.Open(config.DatabasePath); err != nil {
+func (sc *ServerContext) Run() (err error) {
+	if err = db.Open(sc.config.DatabasePath); err != nil {
 		return err
 	}
 
 	attachApi(sc)
 
-	fmt.Printf("Serving at %s:%d ...\n", config.ListenAddress,
-		config.ListenPort)
+	fmt.Printf("Serving at %s:%d ...\n", sc.config.ListenAddress,
+		sc.config.ListenPort)
 
 	if err = http.ListenAndServe(fmt.Sprintf("%s:%d",
-		config.ListenAddress, config.ListenPort), sc.router); err != nil {
+		sc.config.ListenAddress, sc.config.ListenPort), sc.router); err != nil {
 		return err
 	}
 
