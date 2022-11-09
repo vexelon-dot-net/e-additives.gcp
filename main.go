@@ -18,7 +18,8 @@ func main() {
 		log.Fatalf("Config error: %v\n", err)
 	}
 
-	if err := service.Start(); err != nil {
+	server := service.NewServer()
+	if err := server.Start(); err != nil {
 		log.Fatalf("Server error: %v\n", err)
 	}
 }

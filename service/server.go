@@ -13,21 +13,22 @@ type ServerContext struct {
 	// workerPool *WokerPool
 }
 
-func Start() (err error) {
-	ctx := new(ServerContext)
-	ctx.router = http.NewServeMux()
+func NewServer() *ServerContext {
+	return &ServerContext{http.NewServeMux()}
+}
 
+func (sc *ServerContext) Start() (err error) {
 	if err = db.Open(config.DatabasePath); err != nil {
 		return err
 	}
 
-	attachApi(ctx)
+	attachApi(sc)
 
 	fmt.Printf("Serving at %s:%d ...\n", config.ListenAddress,
 		config.ListenPort)
 
 	if err = http.ListenAndServe(fmt.Sprintf("%s:%d",
-		config.ListenAddress, config.ListenPort), ctx.router); err != nil {
+		config.ListenAddress, config.ListenPort), sc.router); err != nil {
 		return err
 	}
 
