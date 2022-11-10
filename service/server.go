@@ -6,6 +6,7 @@ import (
 
 	"github.com/vexelon-dot-net/e-additives.gcp/config"
 	"github.com/vexelon-dot-net/e-additives.gcp/db"
+	"github.com/vexelon-dot-net/e-additives.gcp/service/rs"
 )
 
 type ServerContext struct {
@@ -26,7 +27,7 @@ func (sc *ServerContext) Run() (err error) {
 		return err
 	}
 
-	attachApi(sc)
+	_ = rs.NewRestApi(sc.router)
 
 	fmt.Printf("Serving at %s:%d ...\n", sc.config.ListenAddress,
 		sc.config.ListenPort)
