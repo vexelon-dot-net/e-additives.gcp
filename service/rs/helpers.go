@@ -37,7 +37,7 @@ func (w *MyResponseWriter) writeJson(data interface{}) {
 	w.Write(resp)
 }
 
-func getIdParam(r *http.Request, junction string) (int, error) {
+func getKeyParam(r *http.Request, junction string) (int, error) {
 	parsed := strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, junction), "/")
 	if len(parsed) > 0 {
 		id, err := strconv.Atoi(parsed)

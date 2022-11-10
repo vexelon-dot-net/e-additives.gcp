@@ -20,6 +20,7 @@ func NewRestApi(router *http.ServeMux) *RestApi {
 	router.HandleFunc(slashIndex, api.handleIndex())
 	router.HandleFunc(slashIndex+"/", api.handleIndex())
 	router.HandleFunc(slashLocales, api.handleLocales())
+	router.HandleFunc(slashLocales+"/", api.handleLocales())
 	router.HandleFunc(slashCategories, api.handleCategories())
 	router.HandleFunc(slashCategories+"/", api.handleCategories())
 
