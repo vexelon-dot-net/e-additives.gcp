@@ -35,8 +35,11 @@ func NewProvider(path string) (provider *DBProvider, err error) {
 	}
 
 	provider = &DBProvider{
-		Locales:   localesChannel{DBChannel{sqlDB}},
-		Additives: additivesChannel{DBChannel{sqlDB}},
+		Locales: localesChannel{DBChannel{sqlDB}},
+		Additives: additivesChannel{
+			DBChannel:  DBChannel{sqlDB},
+			Categories: categoriesChannel{DBChannel{sqlDB}},
+		},
 	}
 
 	return provider, nil

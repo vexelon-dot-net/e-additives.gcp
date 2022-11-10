@@ -22,7 +22,7 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 		loc := *locales[1]
 
 		if id > 0 {
-			cat, err := api.provider.Additives.FetchCategory(id, loc)
+			cat, err := api.provider.Additives.Categories.FetchOne(id, loc)
 			if err != nil {
 				w.writeError(err)
 			} else {
@@ -30,7 +30,7 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 			}
 		} else {
 			// TODO: decorate add urls for each item
-			categories, err := api.provider.Additives.FetchCategories(loc)
+			categories, err := api.provider.Additives.Categories.FetchAll(loc)
 			if err != nil {
 				w.writeError(err)
 			} else {
