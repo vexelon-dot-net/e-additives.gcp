@@ -10,8 +10,9 @@ import (
 )
 
 type ServerContext struct {
-	config *config.Config
-	router *http.ServeMux
+	config   *config.Config
+	router   *http.ServeMux
+	provider *db.DBProvider
 	// workerPool *WokerPool
 }
 
@@ -19,15 +20,17 @@ func NewServer(config *config.Config) *ServerContext {
 	return &ServerContext{
 		config,
 		http.NewServeMux(),
+		nil,
 	}
 }
 
 func (sc *ServerContext) Run() (err error) {
-	if err = db.Open(sc.config.DatabasePath); err != nil {
+	sc.provider, err = db.NewProvider(sc.config.DatabasePath)
+	if err != nil {
 		return err
 	}
 
-	_ = rs.NewRestApi(sc.router)
+	_ = rs.NewRestApi(sc.router, sc.provider)
 
 	fmt.Printf("Serving at %s:%d ...\n", sc.config.ListenAddress,
 		sc.config.ListenPort)

@@ -1,6 +1,12 @@
 package db
 
-import "fmt"
+import (
+	"fmt"
+)
+
+type localesChannel struct {
+	DBChannel
+}
 
 type Locale struct {
 	Id      int    `json:"id"`
@@ -15,8 +21,8 @@ func (loc *Locale) ScanFrom(r Row) (err error) {
 	return err
 }
 
-func FetchAllLocales() ([]*Locale, error) {
-	rows, err := db.Query(`SELECT * FROM ead_Locale`)
+func (chn *localesChannel) FetchAll() ([]*Locale, error) {
+	rows, err := chn.db.Query(`SELECT * FROM ead_Locale`)
 	if err != nil {
 		return nil, fmt.Errorf("Error fetching all locales: %w", err)
 	}
@@ -38,10 +44,10 @@ func FetchAllLocales() ([]*Locale, error) {
 	return locales, nil
 }
 
-func FetchOneLocale(locId int) (*Locale, error) {
+func (chn *localesChannel) FetchOne(locId int) (*Locale, error) {
 	loc := new(Locale)
 
-	err := loc.ScanFrom(db.QueryRow(`SELECT * FROM ead_Locale WHERE id=$1`, locId))
+	err := loc.ScanFrom(chn.db.QueryRow(`SELECT * FROM ead_Locale WHERE id=$1`, locId))
 	if err != nil {
 		return nil, fmt.Errorf("Error fetching single locale '%d': %w", locId, err)
 	}

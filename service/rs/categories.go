@@ -2,8 +2,6 @@ package rs
 
 import (
 	"net/http"
-
-	"github.com/vexelon-dot-net/e-additives.gcp/db"
 )
 
 func (api *RestApi) handleCategories() http.HandlerFunc {
@@ -16,7 +14,7 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 		}
 
 		// TODO
-		locales, err := db.FetchAllLocales()
+		locales, err := api.provider.Locales.FetchAll()
 		if err != nil {
 			w.writeError(err)
 			return
@@ -24,7 +22,7 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 		loc := *locales[1]
 
 		if id > 0 {
-			cat, err := db.FetchOneCategory(id, loc)
+			cat, err := api.provider.Additives.FetchCategory(id, loc)
 			if err != nil {
 				w.writeError(err)
 			} else {
@@ -32,7 +30,7 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 			}
 		} else {
 			// TODO: decorate add urls for each item
-			categories, err := db.FetchAllCategories(loc)
+			categories, err := api.provider.Additives.FetchCategories(loc)
 			if err != nil {
 				w.writeError(err)
 			} else {

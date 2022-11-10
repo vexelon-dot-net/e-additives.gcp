@@ -3,6 +3,8 @@ package rs
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/vexelon-dot-net/e-additives.gcp/db"
 )
 
 const (
@@ -11,12 +13,14 @@ const (
 	slashCategories = slashIndex + "/categories"
 )
 
-type RestApi struct{}
+type RestApi struct {
+	provider *db.DBProvider
+}
 
-func NewRestApi(router *http.ServeMux) *RestApi {
+func NewRestApi(router *http.ServeMux, provider *db.DBProvider) *RestApi {
 	fmt.Printf("Attaching http API at %s ...\n", slashIndex)
 
-	api := &RestApi{}
+	api := &RestApi{provider}
 	router.HandleFunc(slashIndex, api.handleIndex())
 	router.HandleFunc(slashIndex+"/", api.handleIndex())
 	router.HandleFunc(slashLocales, api.handleLocales())

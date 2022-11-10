@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+type additivesChannel struct {
+	DBChannel
+}
+
 type AdditiveCategory struct {
 	Id               int       `json:"id"`
 	Name             string    `json:"name"`
@@ -39,8 +43,8 @@ func (ac *AdditiveCategory) ScanFrom(r Row) (err error) {
 	return err
 }
 
-func FetchAllCategories(loc Locale) ([]*AdditiveCategory, error) {
-	rows, err := db.Query(`
+func (chn *additivesChannel) FetchCategories(loc Locale) ([]*AdditiveCategory, error) {
+	rows, err := chn.db.Query(`
 		SELECT c.id, p.name, p.description, p.last_update,
 		(SELECT COUNT(id) FROM ead_Additive as a WHERE a.category_id=c.id) as additives
 		FROM ead_AdditiveCategory as c
@@ -68,10 +72,10 @@ func FetchAllCategories(loc Locale) ([]*AdditiveCategory, error) {
 	return cats, nil
 }
 
-func FetchOneCategory(catId int, loc Locale) (*AdditiveCategory, error) {
+func (chn *additivesChannel) FetchCategory(catId int, loc Locale) (*AdditiveCategory, error) {
 	cat := new(AdditiveCategory)
 
-	err := cat.ScanFrom(db.QueryRow(`
+	err := cat.ScanFrom(chn.db.QueryRow(`
 		SELECT c.id, p.name, p.description, p.last_update,
 		(SELECT COUNT(id) FROM ead_Additive as a WHERE a.category_id=c.id) as additives
 		FROM ead_AdditiveCategory as c

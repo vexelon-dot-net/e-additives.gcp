@@ -2,8 +2,6 @@ package rs
 
 import (
 	"net/http"
-
-	"github.com/vexelon-dot-net/e-additives.gcp/db"
 )
 
 func (api *RestApi) handleLocales() http.HandlerFunc {
@@ -17,14 +15,14 @@ func (api *RestApi) handleLocales() http.HandlerFunc {
 		}
 
 		if id > 0 {
-			cat, err := db.FetchOneLocale(id)
+			cat, err := api.provider.Locales.FetchOne(id)
 			if err != nil {
 				w.writeError(err)
 			} else {
 				w.writeJson(cat)
 			}
 		} else {
-			locales, err := db.FetchAllLocales()
+			locales, err := api.provider.Locales.FetchAll()
 			if err != nil {
 				w.writeError(err)
 			} else {
