@@ -16,6 +16,7 @@ type AdditiveCategory struct {
 	LastUpdate       string    `json:"last_update"`
 	LastUpdateParsed time.Time `json:"-"`
 	Additives        int       `json:"additives"`
+	Url              string    `json:"url,omitempty"`
 }
 
 func (ac *AdditiveCategory) ScanFrom(r Row) (err error) {
