@@ -29,5 +29,11 @@ func CreateFromEnv() (*Config, error) {
 		return nil, err
 	}
 
+	value, isPresent = os.LookupEnv("DEVMODE")
+	if !isPresent {
+		config.IsDevMode = false
+	}
+	config.IsDevMode, _ = strconv.ParseBool(value)
+
 	return config, nil
 }

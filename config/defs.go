@@ -12,6 +12,8 @@ type Config struct {
 	ListenPort int
 	// path to the sqlite database
 	DatabasePath string
+	// enbale dev mode behavior
+	IsDevMode bool
 }
 
 func verifyPath(path string, what string, mustExist bool) error {

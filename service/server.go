@@ -7,13 +7,13 @@ import (
 	"github.com/vexelon-dot-net/e-additives.gcp/config"
 	"github.com/vexelon-dot-net/e-additives.gcp/db"
 	"github.com/vexelon-dot-net/e-additives.gcp/service/rs"
+	"github.com/vexelon-dot-net/e-additives.gcp/service/www"
 )
 
 type ServerContext struct {
 	config   *config.Config
 	router   *http.ServeMux
 	provider *db.DBProvider
-	// workerPool *WokerPool
 }
 
 func NewServer(config *config.Config) *ServerContext {
@@ -30,7 +30,8 @@ func (sc *ServerContext) Run() (err error) {
 		return err
 	}
 
-	_ = rs.NewRestApi(sc.router, sc.provider)
+	rs.NewRestApi(sc.router, sc.provider)
+	www.AttachWebApp(sc.router, sc.config.IsDevMode)
 
 	fmt.Printf("Serving at %s:%d ...\n", sc.config.ListenAddress,
 		sc.config.ListenPort)

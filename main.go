@@ -14,12 +14,16 @@ func main() {
 
 	fmt.Printf("%s e-additives API service v%s %s\n\n", HEART, config.VERSION, HEART)
 
-	cfg, err := config.CreateFromEnv()
+	config, err := config.CreateFromEnv()
 	if err != nil {
 		log.Fatalf("Config error: %v\n", err)
 	}
 
-	server := service.NewServer(cfg)
+	if config.IsDevMode {
+		fmt.Println("DEV mode enabled.")
+	}
+
+	server := service.NewServer(config)
 	if err := server.Run(); err != nil {
 		log.Fatalf("Server error: %v\n", err)
 	}
