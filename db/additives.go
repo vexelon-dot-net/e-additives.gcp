@@ -46,14 +46,16 @@ func (a *Additive) ScanFrom(r Row) (err error) {
 	var (
 		veg    sql.NullBool
 		status sql.NullString
+		foods  sql.NullString
 		notice sql.NullString
 	)
 	if err = r.Scan(&a.Id, &a.Code, &a.LastUpdate, &a.CatId, &a.Name, &status,
-		&veg, &a.Function, &a.Foods, &notice, &a.Info); err != nil {
+		&veg, &a.Function, &foods, &notice, &a.Info); err != nil {
 		return fmt.Errorf("Error scanning additive row: %w", err)
 	}
 	a.Veg = yesNoEmptyIfNull(veg)
 	a.Status = emptyIfNull(status)
+	a.Foods = emptyIfNull(foods)
 	a.Notice = emptyIfNull(notice)
 	a.LastUpdateParsed, err = time.Parse(dateTimeLayout, a.LastUpdate)
 	return err
