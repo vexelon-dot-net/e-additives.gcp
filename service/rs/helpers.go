@@ -44,10 +44,13 @@ func getKeyParam(r *http.Request, junction string) string {
 func getIdParam(r *http.Request, junction string) (int, error) {
 	key := getKeyParam(r, junction)
 
-	id, err := strconv.Atoi(key)
-	if err != nil {
-		return 0, fmt.Errorf("Error parsing id '%s': %w", key, err)
+	if len(key) > 0 {
+		id, err := strconv.Atoi(key)
+		if err != nil {
+			return 0, fmt.Errorf("Error parsing id '%s': %w", key, err)
+		}
+		return id, nil
 	}
 
-	return id, nil
+	return 0, nil
 }
