@@ -7,15 +7,10 @@ import (
 func (api *RestApi) handleLocales() http.HandlerFunc {
 	return func(_w http.ResponseWriter, r *http.Request) {
 		w := &MyResponseWriter{_w}
+		code := getKeyParam(r, slashLocales)
 
-		id, err := getIdParam(r, slashLocales)
-		if err != nil {
-			w.writeError(err)
-			return
-		}
-
-		if id > 0 {
-			loc, err := api.provider.Locales.FetchOne(id)
+		if len(code) > 0 {
+			loc, err := api.provider.Locales.FetchOne(code)
 			if err != nil {
 				w.writeError(err)
 			} else {
