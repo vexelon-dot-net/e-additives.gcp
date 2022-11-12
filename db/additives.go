@@ -44,19 +44,23 @@ func (am *AdditiveMeta) ScanFrom(r Row) (err error) {
 
 func (a *Additive) ScanFrom(r Row) (err error) {
 	var (
-		veg    sql.NullBool
-		status sql.NullString
-		foods  sql.NullString
-		notice sql.NullString
+		status   sql.NullString
+		veg      sql.NullBool
+		function sql.NullBool
+		foods    sql.NullString
+		notice   sql.NullString
+		info     sql.NullString
 	)
 	if err = r.Scan(&a.Id, &a.Code, &a.LastUpdate, &a.CatId, &a.Name, &status,
-		&veg, &a.Function, &foods, &notice, &a.Info); err != nil {
+		&veg, &function, &foods, &notice, &info); err != nil {
 		return fmt.Errorf("Error scanning additive row: %w", err)
 	}
-	a.Veg = yesNoEmptyIfNull(veg)
 	a.Status = emptyIfNull(status)
+	a.Veg = yesNoEmptyIfNull(veg)
+	a.Function = yesNoEmptyIfNull(function)
 	a.Foods = emptyIfNull(foods)
 	a.Notice = emptyIfNull(notice)
+	a.Info = emptyIfNull(info)
 	a.LastUpdateParsed, err = time.Parse(dateTimeLayout, a.LastUpdate)
 	return err
 }
