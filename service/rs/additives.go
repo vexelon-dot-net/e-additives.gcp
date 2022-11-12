@@ -14,7 +14,7 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 		code := getKeyParam(r, slashAdditives)
 
 		if len(code) > 0 {
-			a, err := api.provider.Additives.FetchOne(code, api.defaultLocale)
+			a, err := api.provider.Additives.FetchOne(code, api.getLocale(r))
 			if err != nil {
 				w.writeError(err)
 			} else {
@@ -34,10 +34,10 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 					w.writeError(err)
 					return
 				}
-				additives, err = api.provider.Additives.FetchAllByCategory(catId, api.defaultLocale)
+				additives, err = api.provider.Additives.FetchAllByCategory(catId, api.getLocale(r))
 
 			} else {
-				additives, err = api.provider.Additives.FetchAll(api.defaultLocale)
+				additives, err = api.provider.Additives.FetchAll(api.getLocale(r))
 			}
 
 			if err != nil {
