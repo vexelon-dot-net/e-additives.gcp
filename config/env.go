@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-func CreateFromEnv() (*Config, error) {
-	config := new(Config)
+func CreateFromEnv() (config *Config, err error) {
+	config = new(Config)
 
 	value, isPresent := os.LookupEnv("PORT")
 	if !isPresent {
@@ -25,15 +25,18 @@ func CreateFromEnv() (*Config, error) {
 		return nil, fmt.Errorf("Cannot find env `DB_PATH`!")
 	}
 
-	if err := verifyPath(config.DatabasePath, "DatabasePath", true); err != nil {
+	if err = verifyPath(config.DatabasePath, "DatabasePath", true); err != nil {
 		return nil, err
 	}
 
 	value, isPresent = os.LookupEnv("DEVMODE")
-	if !isPresent {
+	if isPresent {
+		if config.IsDevMode, err = strconv.ParseBool(value); err != nil {
+			return nil, fmt.Errorf("Cannot parse env `DEVMODE`! %w", err)
+		}
+	} else {
 		config.IsDevMode = false
 	}
-	config.IsDevMode, _ = strconv.ParseBool(value)
 
 	return config, nil
 }
