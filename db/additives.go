@@ -37,15 +37,18 @@ type Additive struct {
 }
 
 func (am *AdditiveMeta) ScanFrom(r Row) (err error) {
-	if err = r.Scan(&am.Id, &am.Code, &am.LastUpdate, &am.Name); err != nil {
+	var name sql.NullString
+	if err = r.Scan(&am.Id, &am.Code, &am.LastUpdate, &name); err != nil {
 		return fmt.Errorf("Error scanning additive meta row: %w", err)
 	}
+	am.Name = emptyIfNull(name)
 	am.LastUpdateParsed, err = time.Parse(dateTimeLayout, am.LastUpdate)
 	return err
 }
 
 func (a *Additive) ScanFrom(r Row) (err error) {
 	var (
+		name     sql.NullString
 		status   sql.NullString
 		veg      sql.NullBool
 		function sql.NullString
@@ -53,10 +56,11 @@ func (a *Additive) ScanFrom(r Row) (err error) {
 		notice   sql.NullString
 		info     sql.NullString
 	)
-	if err = r.Scan(&a.Id, &a.Code, &a.LastUpdate, &a.Category, &a.Name, &status,
+	if err = r.Scan(&a.Id, &a.Code, &a.LastUpdate, &a.Category, &name, &status,
 		&veg, &function, &foods, &notice, &info); err != nil {
 		return fmt.Errorf("Error scanning additive row: %w", err)
 	}
+	a.Name = emptyIfNull(name)
 	a.Status = emptyIfNull(status)
 	a.Veg = yesNoEmptyIfNull(veg)
 	a.Function = emptyIfNull(function)
