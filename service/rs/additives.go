@@ -2,6 +2,10 @@ package rs
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/vexelon-dot-net/e-additives.gcp/db"
 )
 
 func (api *RestApi) handleAdditives() http.HandlerFunc {
@@ -25,8 +29,23 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 				w.writeJson(a)
 			}
 		} else {
+			var additives []*db.AdditiveMeta
+
+			category := strings.TrimSpace(r.URL.Query().Get("category"))
+			if len(category) > 0 {
+				catId, err := strconv.Atoi(category)
+				if err != nil {
+					w.writeError(err)
+					return
+				}
+				additives, err = api.provider.Additives.FetchAllByCategory(catId, loc)
+
+			} else {
+				additives, err = api.provider.Additives.FetchAll(loc)
+			}
+
 			// TODO: decorate add urls for each item
-			additives, err := api.provider.Additives.FetchAll(loc)
+			// additives, err := api.provider.Additives.FetchAll(loc)
 			if err != nil {
 				w.writeError(err)
 			} else {

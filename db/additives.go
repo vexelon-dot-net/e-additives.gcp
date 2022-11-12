@@ -46,7 +46,7 @@ func (a *Additive) ScanFrom(r Row) (err error) {
 	var (
 		status   sql.NullString
 		veg      sql.NullBool
-		function sql.NullBool
+		function sql.NullString
 		foods    sql.NullString
 		notice   sql.NullString
 		info     sql.NullString
@@ -57,12 +57,29 @@ func (a *Additive) ScanFrom(r Row) (err error) {
 	}
 	a.Status = emptyIfNull(status)
 	a.Veg = yesNoEmptyIfNull(veg)
-	a.Function = yesNoEmptyIfNull(function)
+	a.Function = emptyIfNull(function)
 	a.Foods = emptyIfNull(foods)
 	a.Notice = emptyIfNull(notice)
 	a.Info = emptyIfNull(info)
 	a.LastUpdateParsed, err = time.Parse(dateTimeLayout, a.LastUpdate)
 	return err
+}
+
+func additiveRowsToArray(rows *sql.Rows) ([]*AdditiveMeta, error) {
+	additives := make([]*AdditiveMeta, 0)
+	for rows.Next() {
+		am := new(AdditiveMeta)
+		if err := am.ScanFrom(rows); err != nil {
+			return nil, err
+		}
+		additives = append(additives, am)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return additives, nil
 }
 
 func (chn *additivesChannel) FetchAll(loc Locale) ([]*AdditiveMeta, error) {
@@ -77,20 +94,23 @@ func (chn *additivesChannel) FetchAll(loc Locale) ([]*AdditiveMeta, error) {
 	}
 	defer rows.Close()
 
-	additives := make([]*AdditiveMeta, 0)
-	for rows.Next() {
-		am := new(AdditiveMeta)
-		if err = am.ScanFrom(rows); err != nil {
-			return nil, err
-		}
-		additives = append(additives, am)
-	}
+	return additiveRowsToArray(rows)
+}
 
-	if err = rows.Err(); err != nil {
-		return nil, err
+func (chn *additivesChannel) FetchAllByCategory(catId int, loc Locale) ([]*AdditiveMeta, error) {
+	rows, err := chn.db.Query(`
+		SELECT a.id, a.code, a.last_update,
+		(SELECT value_str FROM ead_AdditiveProps WHERE additive_id = a.id 
+			AND key_name = 'name' AND locale_id = $1) AS name
+		FROM ead_Additive AS a
+		WHERE a.category_id = $2
+	`, loc.Id, catId)
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching category (%d) additives: %w", catId, err)
 	}
+	defer rows.Close()
 
-	return additives, nil
+	return additiveRowsToArray(rows)
 }
 
 func (chn *additivesChannel) FetchOne(code string, loc Locale) (*Additive, error) {
