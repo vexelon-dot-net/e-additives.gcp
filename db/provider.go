@@ -24,6 +24,23 @@ type RowScanner interface {
 	ScanFrom(Row) error
 }
 
+func emptyIfNull(str sql.NullString) string {
+	if str.Valid {
+		return str.String
+	}
+	return ""
+}
+
+func yesNoEmptyIfNull(b sql.NullBool) string {
+	if b.Valid {
+		if b.Bool {
+			return "yes"
+		}
+		return "no"
+	}
+	return ""
+}
+
 func NewProvider(path string) (provider *DBProvider, err error) {
 	sqlDB, err := sql.Open("sqlite3", path)
 	if err != nil {

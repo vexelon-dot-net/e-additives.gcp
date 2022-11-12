@@ -11,6 +11,7 @@ const (
 	slashIndex      = "/api"
 	slashLocales    = slashIndex + "/locales"
 	slashCategories = slashIndex + "/categories"
+	slashAdditives  = slashIndex + "/additives"
 )
 
 type RestApi struct {
@@ -27,6 +28,8 @@ func NewRestApi(router *http.ServeMux, provider *db.DBProvider) *RestApi {
 	router.HandleFunc(slashLocales+"/", api.handleLocales())
 	router.HandleFunc(slashCategories, api.handleCategories())
 	router.HandleFunc(slashCategories+"/", api.handleCategories())
+	router.HandleFunc(slashAdditives, api.handleAdditives())
+	router.HandleFunc(slashAdditives+"/", api.handleAdditives())
 
 	return api
 }
@@ -39,7 +42,8 @@ func (api *RestApi) handleIndex() http.HandlerFunc {
 			slashLocales:             "Fetches list of locales",
 			slashCategories:          "Fetches list of additive categories",
 			slashCategories + "/:id": "Fetches a single additive category by id",
-			// API_DEVICES + "/search?key=:key": "Fetches a list of devices given a key parameter",
+			slashAdditives:           "Fetches list of additives",
+			slashAdditives + "/:id":  "Fetches a single additive by code",
 		}
 		writer.writeJson(routes)
 	}
