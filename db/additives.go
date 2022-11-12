@@ -17,6 +17,7 @@ type AdditiveMeta struct {
 	Name             string    `json:"name"`
 	LastUpdate       string    `json:"last_update"`
 	LastUpdateParsed time.Time `json:"-"`
+	Url              string    `json:"url,omitempty"`
 }
 
 type Additive struct {
@@ -32,6 +33,7 @@ type Additive struct {
 	Info             string    `json:"info,omitempty"`
 	LastUpdate       string    `json:"last_update"`
 	LastUpdateParsed time.Time `json:"-"`
+	Url              string    `json:"url,omitempty"`
 }
 
 func (am *AdditiveMeta) ScanFrom(r Row) (err error) {

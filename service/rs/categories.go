@@ -1,17 +1,9 @@
 package rs
 
 import (
-	"fmt"
 	"net/http"
-
-	"github.com/vexelon-dot-net/e-additives.gcp/db"
+	"strconv"
 )
-
-func decorateCategories(r *http.Request, categories []*db.AdditiveCategory) {
-	for _, cat := range categories {
-		cat.Url = fmt.Sprintf("%s%s/%d", r.Referer(), slashCategories, cat.Category)
-	}
-}
 
 func (api *RestApi) handleCategories() http.HandlerFunc {
 	return func(_w http.ResponseWriter, r *http.Request) {
@@ -35,15 +27,17 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 			if err != nil {
 				w.writeError(err)
 			} else {
+				cat.Url = getUrl(r, slashCategories, strconv.Itoa(cat.Category))
 				w.writeJson(cat)
 			}
 		} else {
-			// TODO: decorate add urls for each item
 			categories, err := api.provider.Additives.Categories.FetchAll(loc)
 			if err != nil {
 				w.writeError(err)
 			} else {
-				decorateCategories(r, categories)
+				for _, cat := range categories {
+					cat.Url = getUrl(r, slashCategories, strconv.Itoa(cat.Category))
+				}
 				w.writeJson(categories)
 			}
 		}

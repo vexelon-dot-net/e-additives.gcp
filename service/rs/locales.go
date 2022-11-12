@@ -15,17 +15,21 @@ func (api *RestApi) handleLocales() http.HandlerFunc {
 		}
 
 		if id > 0 {
-			cat, err := api.provider.Locales.FetchOne(id)
+			loc, err := api.provider.Locales.FetchOne(id)
 			if err != nil {
 				w.writeError(err)
 			} else {
-				w.writeJson(cat)
+				loc.Url = getUrl(r, slashLocales, loc.Code)
+				w.writeJson(loc)
 			}
 		} else {
 			locales, err := api.provider.Locales.FetchAll()
 			if err != nil {
 				w.writeError(err)
 			} else {
+				for _, loc := range locales {
+					loc.Url = getUrl(r, slashLocales, loc.Code)
+				}
 				w.writeJson(locales)
 			}
 		}

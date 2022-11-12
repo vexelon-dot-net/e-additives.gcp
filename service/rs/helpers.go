@@ -54,3 +54,7 @@ func getIdParam(r *http.Request, junction string) (int, error) {
 
 	return 0, nil
 }
+
+func getUrl(r *http.Request, prefix string, id string) string {
+	return fmt.Sprintf("%s%s/%s", r.Referer(), prefix, id)
+}

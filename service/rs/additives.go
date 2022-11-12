@@ -26,6 +26,7 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 			if err != nil {
 				w.writeError(err)
 			} else {
+				a.Url = getUrl(r, slashAdditives, a.Code)
 				w.writeJson(a)
 			}
 		} else {
@@ -44,11 +45,12 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 				additives, err = api.provider.Additives.FetchAll(loc)
 			}
 
-			// TODO: decorate add urls for each item
-			// additives, err := api.provider.Additives.FetchAll(loc)
 			if err != nil {
 				w.writeError(err)
 			} else {
+				for _, a := range additives {
+					a.Url = getUrl(r, slashAdditives, a.Code)
+				}
 				w.writeJson(additives)
 			}
 		}

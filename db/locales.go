@@ -12,6 +12,7 @@ type Locale struct {
 	Id      int    `json:"id"`
 	Code    string `json:"code"`
 	Enabled bool   `json:"enabled"`
+	Url     string `json:"url,omitempty"`
 }
 
 func (loc *Locale) ScanFrom(r Row) (err error) {
