@@ -10,7 +10,8 @@ type categoriesChannel struct {
 }
 
 type AdditiveCategory struct {
-	Id               int       `json:"id"`
+	Id               int       `json:"-"`
+	Category         int       `json:"category"`
 	Name             string    `json:"name"`
 	Description      string    `json:"description"`
 	LastUpdate       string    `json:"last_update"`
@@ -20,7 +21,8 @@ type AdditiveCategory struct {
 }
 
 func (ac *AdditiveCategory) ScanFrom(r Row) (err error) {
-	if err = r.Scan(&ac.Id, &ac.Name, &ac.Description, &ac.LastUpdate, &ac.Additives); err != nil {
+	if err = r.Scan(&ac.Id, &ac.Category, &ac.Name, &ac.Description,
+		&ac.LastUpdate, &ac.Additives); err != nil {
 		return fmt.Errorf("Error scanning additive category row: %w", err)
 	}
 	ac.LastUpdateParsed, err = time.Parse(dateTimeLayout, ac.LastUpdate)
@@ -29,7 +31,7 @@ func (ac *AdditiveCategory) ScanFrom(r Row) (err error) {
 
 func (chn *categoriesChannel) FetchAll(loc Locale) ([]*AdditiveCategory, error) {
 	rows, err := chn.db.Query(`
-		SELECT c.id, p.name, p.description, p.last_update,
+		SELECT c.id, c.category, p.name, p.description, p.last_update,
 		(SELECT COUNT(id) FROM ead_Additive AS a WHERE a.category_id=c.id) AS additives
 		FROM ead_AdditiveCategory AS c
 		LEFT JOIN ead_AdditiveCategoryProps AS p ON p.category_id = c.id
@@ -56,18 +58,18 @@ func (chn *categoriesChannel) FetchAll(loc Locale) ([]*AdditiveCategory, error) 
 	return cats, nil
 }
 
-func (chn *categoriesChannel) FetchOne(catId int, loc Locale) (*AdditiveCategory, error) {
+func (chn *categoriesChannel) FetchOne(category int, loc Locale) (*AdditiveCategory, error) {
 	cat := new(AdditiveCategory)
 
 	err := cat.ScanFrom(chn.db.QueryRow(`
-		SELECT c.id, p.name, p.description, p.last_update,
+		SELECT c.id, c.category, p.name, p.description, p.last_update,
 		(SELECT COUNT(id) FROM ead_Additive AS a WHERE a.category_id=c.id) AS additives
 		FROM ead_AdditiveCategory AS c
 		LEFT JOIN ead_AdditiveCategoryProps AS p ON p.category_id = c.id
-		WHERE c.id = $1 AND p.locale_id = $2
-	`, catId, loc.Id))
+		WHERE c.category = $1 AND p.locale_id = $2
+	`, category, loc.Id))
 	if err != nil {
-		return nil, fmt.Errorf("Error fetching single category '%d': %w", catId, err)
+		return nil, fmt.Errorf("Error fetching single category '%d': %w", category, err)
 	}
 
 	return cat, nil

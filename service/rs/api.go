@@ -36,12 +36,12 @@ func (api *RestApi) handleIndex() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		writer := &MyResponseWriter{w}
 		routes := map[string]string{
-			slashIndex:               "Fetches this list of junctions",
-			slashLocales:             "Fetches list of locales",
-			slashCategories:          "Fetches list of additive categories",
-			slashCategories + "/:id": "Fetches a single additive category by id",
-			slashAdditives:           "Fetches list of additives",
-			slashAdditives + "/:id":  "Fetches a single additive by code",
+			slashIndex:                     "Fetches this list of junctions",
+			slashLocales:                   "Fetches list of locales",
+			slashCategories:                "Fetches list of additive categories",
+			slashCategories + "/:category": "Fetches a single additive category by id",
+			slashAdditives:                 "Fetches list of additives",
+			slashAdditives + "/:code":      "Fetches a single additive by code",
 		}
 		writer.writeJson(routes)
 	}

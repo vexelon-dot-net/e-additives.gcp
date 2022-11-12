@@ -9,7 +9,7 @@ import (
 
 func decorateCategories(r *http.Request, categories []*db.AdditiveCategory) {
 	for _, cat := range categories {
-		cat.Url = fmt.Sprintf("%s%s/%d", r.Referer(), slashCategories, cat.Id)
+		cat.Url = fmt.Sprintf("%s%s/%d", r.Referer(), slashCategories, cat.Category)
 	}
 }
 

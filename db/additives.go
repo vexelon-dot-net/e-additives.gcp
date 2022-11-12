@@ -21,7 +21,7 @@ type AdditiveMeta struct {
 
 type Additive struct {
 	Id               int       `json:"-"`
-	CatId            int       `json:"category_id"`
+	Category         int       `json:"category"`
 	Code             string    `json:"code"`
 	Name             string    `json:"name"`
 	Status           string    `json:"status"`
@@ -51,7 +51,7 @@ func (a *Additive) ScanFrom(r Row) (err error) {
 		notice   sql.NullString
 		info     sql.NullString
 	)
-	if err = r.Scan(&a.Id, &a.Code, &a.LastUpdate, &a.CatId, &a.Name, &status,
+	if err = r.Scan(&a.Id, &a.Code, &a.LastUpdate, &a.Category, &a.Name, &status,
 		&veg, &function, &foods, &notice, &info); err != nil {
 		return fmt.Errorf("Error scanning additive row: %w", err)
 	}
@@ -97,16 +97,17 @@ func (chn *additivesChannel) FetchAll(loc Locale) ([]*AdditiveMeta, error) {
 	return additiveRowsToArray(rows)
 }
 
-func (chn *additivesChannel) FetchAllByCategory(catId int, loc Locale) ([]*AdditiveMeta, error) {
+func (chn *additivesChannel) FetchAllByCategory(category int, loc Locale) ([]*AdditiveMeta, error) {
 	rows, err := chn.db.Query(`
 		SELECT a.id, a.code, a.last_update,
 		(SELECT value_str FROM ead_AdditiveProps WHERE additive_id = a.id 
 			AND key_name = 'name' AND locale_id = $1) AS name
 		FROM ead_Additive AS a
-		WHERE a.category_id = $2
-	`, loc.Id, catId)
+		JOIN ead_AdditiveCategory AS c ON c.id=a.category_id
+		WHERE c.category = $2
+	`, loc.Id, category)
 	if err != nil {
-		return nil, fmt.Errorf("Error fetching category (%d) additives: %w", catId, err)
+		return nil, fmt.Errorf("Error fetching category (%d) additives: %w", category, err)
 	}
 	defer rows.Close()
 
@@ -117,7 +118,7 @@ func (chn *additivesChannel) FetchOne(code string, loc Locale) (*Additive, error
 	a := new(Additive)
 
 	err := a.ScanFrom(chn.db.QueryRow(`
-		SELECT a.id, a.code, a.last_update, a.category_id,
+		SELECT a.id, a.code, a.last_update, c.category,
 		(SELECT value_str FROM ead_AdditiveProps WHERE additive_id = a.id AND key_name = 'name' AND locale_id = $1) AS name,
 		(SELECT value_text FROM ead_AdditiveProps WHERE additive_id = a.id AND key_name = 'status' AND locale_id = $1) AS status,
 		(SELECT value_str FROM ead_AdditiveProps WHERE additive_id = a.id AND key_name = 'veg' AND locale_id = $1) AS veg,
@@ -126,6 +127,7 @@ func (chn *additivesChannel) FetchOne(code string, loc Locale) (*Additive, error
 		(SELECT value_text FROM ead_AdditiveProps WHERE additive_id = a.id AND key_name = 'notice' AND locale_id = $1) AS notice,
 		(SELECT value_big_text FROM ead_AdditiveProps WHERE additive_id = a.id AND key_name = 'info' AND locale_id = $1) AS info
 		FROM ead_Additive AS a 
+		JOIN ead_AdditiveCategory AS c ON c.id=a.category_id
 		WHERE a.code = $2
 	`, loc.Id, code))
 	if err != nil {
