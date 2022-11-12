@@ -7,8 +7,8 @@ env_variables:
 
 handlers:
 - url: /
-  static_files: www/index.html
-  upload: www/index.html
+  static_files: www/build/index.html
+  upload: www/build/index.html
 
 - url: /api(.*)
   secure: always
@@ -16,5 +16,5 @@ handlers:
   script: auto
 
 - url: /(.*)
-  static_files: www/\1
-  upload: www/(.*)
+  static_files: www/build/\1
+  upload: www/build/(.*)
