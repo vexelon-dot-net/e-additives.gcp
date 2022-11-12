@@ -21,7 +21,7 @@ type AdditiveMeta struct {
 
 type Additive struct {
 	Id               int       `json:"-"`
-	CatId            int       `json:"-"`
+	CatId            int       `json:"category_id"`
 	Code             string    `json:"code"`
 	Name             string    `json:"name"`
 	Status           string    `json:"status"`
