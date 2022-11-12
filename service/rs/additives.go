@@ -13,16 +13,8 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 		w := &MyResponseWriter{_w}
 		code := getKeyParam(r, slashAdditives)
 
-		// TODO
-		locales, err := api.provider.Locales.FetchAll()
-		if err != nil {
-			w.writeError(err)
-			return
-		}
-		loc := *locales[1]
-
 		if len(code) > 0 {
-			a, err := api.provider.Additives.FetchOne(code, loc)
+			a, err := api.provider.Additives.FetchOne(code, api.defaultLocale)
 			if err != nil {
 				w.writeError(err)
 			} else {
@@ -30,7 +22,10 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 				w.writeJson(a)
 			}
 		} else {
-			var additives []*db.AdditiveMeta
+			var (
+				additives []*db.AdditiveMeta
+				err       error
+			)
 
 			category := strings.TrimSpace(r.URL.Query().Get("category"))
 			if len(category) > 0 {
@@ -39,10 +34,10 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 					w.writeError(err)
 					return
 				}
-				additives, err = api.provider.Additives.FetchAllByCategory(catId, loc)
+				additives, err = api.provider.Additives.FetchAllByCategory(catId, api.defaultLocale)
 
 			} else {
-				additives, err = api.provider.Additives.FetchAll(loc)
+				additives, err = api.provider.Additives.FetchAll(api.defaultLocale)
 			}
 
 			if err != nil {

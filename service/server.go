@@ -25,12 +25,13 @@ func NewServer(config *config.Config) *ServerContext {
 }
 
 func (sc *ServerContext) Run() (err error) {
-	sc.provider, err = db.NewProvider(sc.config.DatabasePath)
-	if err != nil {
+	if sc.provider, err = db.NewProvider(sc.config.DatabasePath); err != nil {
 		return err
 	}
 
-	rs.AttachRestApi(sc.router, sc.provider)
+	if err = rs.AttachRestApi(sc.router, sc.provider); err != nil {
+		return err
+	}
 	www.AttachWWW(sc.router, sc.config.IsDevMode)
 
 	fmt.Printf("Serving at %s:%d ...\n", sc.config.ListenAddress,

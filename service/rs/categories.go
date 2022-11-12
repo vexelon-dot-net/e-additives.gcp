@@ -14,16 +14,8 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 			return
 		}
 
-		// TODO
-		locales, err := api.provider.Locales.FetchAll()
-		if err != nil {
-			w.writeError(err)
-			return
-		}
-		loc := *locales[1]
-
 		if id > 0 {
-			cat, err := api.provider.Additives.Categories.FetchOne(id, loc)
+			cat, err := api.provider.Additives.Categories.FetchOne(id, api.defaultLocale)
 			if err != nil {
 				w.writeError(err)
 			} else {
@@ -31,7 +23,7 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 				w.writeJson(cat)
 			}
 		} else {
-			categories, err := api.provider.Additives.Categories.FetchAll(loc)
+			categories, err := api.provider.Additives.Categories.FetchAll(api.defaultLocale)
 			if err != nil {
 				w.writeError(err)
 			} else {

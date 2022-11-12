@@ -15,13 +15,19 @@ const (
 )
 
 type RestApi struct {
-	provider *db.DBProvider
+	provider      *db.DBProvider
+	defaultLocale db.Locale
 }
 
-func AttachRestApi(router *http.ServeMux, provider *db.DBProvider) {
+func AttachRestApi(router *http.ServeMux, provider *db.DBProvider) error {
 	fmt.Printf("Attaching http API at %s ...\n", slashIndex)
 
-	api := &RestApi{provider}
+	loc, err := provider.Locales.FetchOne("en")
+	if err != nil {
+		return fmt.Errorf("Error fetching default 'en' locale: %w", err)
+	}
+
+	api := &RestApi{provider, *loc}
 	router.HandleFunc(slashIndex, api.handleIndex())
 	router.HandleFunc(slashIndex+"/", api.handleIndex())
 	router.HandleFunc(slashLocales, api.handleLocales())
@@ -30,6 +36,8 @@ func AttachRestApi(router *http.ServeMux, provider *db.DBProvider) {
 	router.HandleFunc(slashCategories+"/", api.handleCategories())
 	router.HandleFunc(slashAdditives, api.handleAdditives())
 	router.HandleFunc(slashAdditives+"/", api.handleAdditives())
+
+	return nil
 }
 
 func (api *RestApi) handleIndex() http.HandlerFunc {
