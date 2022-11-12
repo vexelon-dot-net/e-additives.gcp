@@ -18,7 +18,7 @@ type RestApi struct {
 	provider *db.DBProvider
 }
 
-func NewRestApi(router *http.ServeMux, provider *db.DBProvider) *RestApi {
+func AttachRestApi(router *http.ServeMux, provider *db.DBProvider) {
 	fmt.Printf("Attaching http API at %s ...\n", slashIndex)
 
 	api := &RestApi{provider}
@@ -30,8 +30,6 @@ func NewRestApi(router *http.ServeMux, provider *db.DBProvider) *RestApi {
 	router.HandleFunc(slashCategories+"/", api.handleCategories())
 	router.HandleFunc(slashAdditives, api.handleAdditives())
 	router.HandleFunc(slashAdditives+"/", api.handleAdditives())
-
-	return api
 }
 
 func (api *RestApi) handleIndex() http.HandlerFunc {

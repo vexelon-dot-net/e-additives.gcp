@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func AttachWebApp(router *http.ServeMux, isDevMode bool) {
+func AttachWWW(router *http.ServeMux, isDevMode bool) {
 	if isDevMode {
 		fmt.Println("Attaching dev mode web app ...")
 		router.Handle("/", http.FileServer(http.Dir("www")))

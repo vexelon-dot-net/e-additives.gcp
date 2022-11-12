@@ -30,8 +30,8 @@ func (sc *ServerContext) Run() (err error) {
 		return err
 	}
 
-	rs.NewRestApi(sc.router, sc.provider)
-	www.AttachWebApp(sc.router, sc.config.IsDevMode)
+	rs.AttachRestApi(sc.router, sc.provider)
+	www.AttachWWW(sc.router, sc.config.IsDevMode)
 
 	fmt.Printf("Serving at %s:%d ...\n", sc.config.ListenAddress,
 		sc.config.ListenPort)
