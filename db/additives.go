@@ -24,12 +24,12 @@ type Additive struct {
 	Category         int       `json:"category"`
 	Code             string    `json:"code"`
 	Name             string    `json:"name"`
-	Status           string    `json:"status"`
-	Veg              string    `json:"veg"`
-	Function         string    `json:"function"`
-	Foods            string    `json:"foods"`
-	Notice           string    `json:"notice"`
-	Info             string    `json:"info"`
+	Status           string    `json:"status,omitempty"`
+	Veg              string    `json:"veg,omitempty"`
+	Function         string    `json:"function,omitempty"`
+	Foods            string    `json:"foods,omitempty"`
+	Notice           string    `json:"notice,omitempty"`
+	Info             string    `json:"info,omitempty"`
 	LastUpdate       string    `json:"last_update"`
 	LastUpdateParsed time.Time `json:"-"`
 }
