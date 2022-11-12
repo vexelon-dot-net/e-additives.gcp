@@ -8,7 +8,7 @@ func (api *RestApi) handleLocales() http.HandlerFunc {
 	return func(_w http.ResponseWriter, r *http.Request) {
 		w := &MyResponseWriter{_w}
 
-		id, err := getKeyParam(r, slashLocales)
+		id, err := getIdParam(r, slashLocales)
 		if err != nil {
 			w.writeError(err)
 			return

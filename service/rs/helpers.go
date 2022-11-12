@@ -37,14 +37,17 @@ func (w *MyResponseWriter) writeJson(data interface{}) {
 	w.Write(resp)
 }
 
-func getKeyParam(r *http.Request, junction string) (int, error) {
-	parsed := strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, junction), "/")
-	if len(parsed) > 0 {
-		id, err := strconv.Atoi(parsed)
-		if err != nil {
-			return 0, fmt.Errorf("Error parsing '%s': %w", parsed, err)
-		}
-		return id, nil
+func getKeyParam(r *http.Request, junction string) string {
+	return strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, junction), "/")
+}
+
+func getIdParam(r *http.Request, junction string) (int, error) {
+	key := getKeyParam(r, junction)
+
+	id, err := strconv.Atoi(key)
+	if err != nil {
+		return 0, fmt.Errorf("Error parsing id '%s': %w", key, err)
 	}
-	return 0, nil
+
+	return id, nil
 }

@@ -7,7 +7,7 @@ import (
 func (api *RestApi) handleCategories() http.HandlerFunc {
 	return func(_w http.ResponseWriter, r *http.Request) {
 		w := &MyResponseWriter{_w}
-		id, err := getKeyParam(r, slashCategories)
+		id, err := getIdParam(r, slashCategories)
 		if err != nil {
 			w.writeError(err)
 			return
