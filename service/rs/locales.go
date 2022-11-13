@@ -5,16 +5,17 @@ import (
 )
 
 func (api *RestApi) handleLocales() http.HandlerFunc {
-	return func(_w http.ResponseWriter, r *http.Request) {
+	return func(_w http.ResponseWriter, _r *http.Request) {
+		r := &MyRequest{_r, slashLocales}
 		w := &MyResponseWriter{_w}
-		code := getKeyParam(r, slashLocales)
 
+		code := r.pathParam()
 		if len(code) > 0 {
 			loc, err := api.provider.Locales.FetchOne(code)
 			if err != nil {
 				w.writeError(err)
 			} else {
-				loc.Url = getUrl(r, slashLocales, loc.Code)
+				loc.Url = r.relUrl(loc.Code)
 				w.writeJson(loc)
 			}
 		} else {
@@ -23,7 +24,7 @@ func (api *RestApi) handleLocales() http.HandlerFunc {
 				w.writeError(err)
 			} else {
 				for _, loc := range locales {
-					loc.Url = getUrl(r, slashLocales, loc.Code)
+					loc.Url = r.relUrl(loc.Code)
 				}
 				w.writeJson(locales)
 			}

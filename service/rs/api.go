@@ -46,8 +46,8 @@ func AttachRestApi(router *http.ServeMux, provider *db.DBProvider) error {
 	return nil
 }
 
-func (api *RestApi) getLocale(r *http.Request) db.Locale {
-	code := r.URL.Query().Get("locale")
+func (api *RestApi) getLocale(code string) db.Locale {
+	//code := r.URL.Query().Get("locale")
 	if len(code) > 0 {
 		loc, ok := api.locales[strings.TrimSpace(code)]
 		if ok {

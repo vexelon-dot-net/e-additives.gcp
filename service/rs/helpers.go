@@ -9,7 +9,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/vexelon-dot-net/e-additives.gcp/db"
 )
+
+type MyRequest struct {
+	*http.Request
+	junction string
+}
 
 type MyResponseWriter struct {
 	http.ResponseWriter
@@ -37,13 +44,12 @@ func (w *MyResponseWriter) writeJson(data interface{}) {
 	w.Write(resp)
 }
 
-func getKeyParam(r *http.Request, junction string) string {
-	return strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, junction), "/")
+func (r *MyRequest) pathParam() string {
+	return strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, r.junction), "/")
 }
 
-func getIdParam(r *http.Request, junction string) (int, error) {
-	key := getKeyParam(r, junction)
-
+func (r *MyRequest) idParam() (int, error) {
+	key := r.pathParam()
 	if len(key) > 0 {
 		id, err := strconv.Atoi(key)
 		if err != nil {
@@ -55,6 +61,10 @@ func getIdParam(r *http.Request, junction string) (int, error) {
 	return 0, nil
 }
 
-func getUrl(r *http.Request, prefix string, id string) string {
-	return fmt.Sprintf("%s%s/%s", r.Referer(), prefix, id)
+func (r *MyRequest) relUrl(id string) string {
+	return fmt.Sprintf("%s%s/%s", r.Referer(), r.junction, id)
+}
+
+func (r *MyRequest) locale(api *RestApi) db.Locale {
+	return api.getLocale(r.URL.Query().Get("locale"))
 }
