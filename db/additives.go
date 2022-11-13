@@ -14,8 +14,8 @@ type additivesChannel struct {
 type AdditiveMeta struct {
 	Id               int       `json:"-"`
 	Code             string    `json:"code"`
-	Name             string    `json:"name"`
-	LastUpdate       string    `json:"last_update"`
+	Name             string    `json:"name,omitempty"`
+	LastUpdate       string    `json:"last_update,omitempty"`
 	LastUpdateParsed time.Time `json:"-"`
 	Url              string    `json:"url,omitempty"`
 }
@@ -31,18 +31,22 @@ type Additive struct {
 	Foods            string    `json:"foods,omitempty"`
 	Notice           string    `json:"notice,omitempty"`
 	Info             string    `json:"info,omitempty"`
-	LastUpdate       string    `json:"last_update"`
+	LastUpdate       string    `json:"last_update,omitempty"`
 	LastUpdateParsed time.Time `json:"-"`
 	Url              string    `json:"url,omitempty"`
 }
 
 func (am *AdditiveMeta) ScanFrom(r Row) (err error) {
 	var name sql.NullString
-	if err = r.Scan(&am.Id, &am.Code, &am.LastUpdate, &name); err != nil {
+	var lastUpdate sql.NullString
+	if err = r.Scan(&am.Id, &am.Code, &lastUpdate, &name); err != nil {
 		return fmt.Errorf("Error scanning additive meta row: %w", err)
 	}
 	am.Name = emptyIfNull(name)
-	am.LastUpdateParsed, err = time.Parse(dateTimeLayout, am.LastUpdate)
+	if lastUpdate.Valid {
+		am.LastUpdate = lastUpdate.String
+		am.LastUpdateParsed, err = time.Parse(dateTimeLayout, am.LastUpdate)
+	}
 	return err
 }
 
@@ -114,6 +118,19 @@ func (chn *additivesChannel) FetchAllByCategory(category int, loc Locale) ([]*Ad
 	`, loc.Id, category)
 	if err != nil {
 		return nil, fmt.Errorf("Error fetching category (%d) additives: %w", category, err)
+	}
+	defer rows.Close()
+
+	return additiveRowsToArray(rows)
+}
+
+func (chn *additivesChannel) Search(keyword string) ([]*AdditiveMeta, error) {
+	rows, err := chn.db.Query(`
+		SELECT id, code, NULL, name FROM ead_AdditiveFTSI 
+		WHERE ead_AdditiveFTSI MATCH $1 ORDER BY rank`,
+		keyword)
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching additives using keyword (%s) additives: %w", keyword, err)
 	}
 	defer rows.Close()
 

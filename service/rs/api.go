@@ -8,13 +8,16 @@ import (
 )
 
 const (
-	slashIndex      = "/api"
-	slashLocales    = slashIndex + "/locales"
-	slashCategories = slashIndex + "/categories"
-	slashAdditives  = slashIndex + "/additives"
+	slashIndex           = "/api"
+	slashLocales         = slashIndex + "/locales"
+	slashCategories      = slashIndex + "/categories"
+	slashAdditives       = slashIndex + "/additives"
+	slashAdditivesSearch = slashIndex + "/additives/search"
 
-	paramJSONP  = "callback"
-	paramLocale = "locale"
+	paramJSONP    = "callback"
+	paramLocale   = "locale"
+	paramCategory = "category"
+	paramKeyword  = "q"
 )
 
 type RestApi struct {
@@ -44,6 +47,8 @@ func AttachRestApi(router *http.ServeMux, provider *db.DBProvider) error {
 	router.HandleFunc(slashCategories+"/", api.handleCategories())
 	router.HandleFunc(slashAdditives, api.handleAdditives())
 	router.HandleFunc(slashAdditives+"/", api.handleAdditives())
+	router.HandleFunc(slashAdditivesSearch, api.handleAdditivesSearch())
+	router.HandleFunc(slashAdditivesSearch+"/", api.handleAdditivesSearch())
 
 	return nil
 }
@@ -63,9 +68,10 @@ func (api *RestApi) handleIndex() http.HandlerFunc {
 			slashIndex:                     "Fetches this list of junctions",
 			slashLocales:                   "Fetches list of locales",
 			slashCategories:                "Fetches list of additive categories",
-			slashCategories + "/:category": "Fetches a single additive category by id",
+			slashCategories + "/:category": "Fetches a single additive category",
 			slashAdditives:                 "Fetches list of additives",
 			slashAdditives + "/:code":      "Fetches a single additive by code",
+			slashAdditivesSearch:           "Search additives by keyword",
 		}
 		h.writeJson(routes)
 	}

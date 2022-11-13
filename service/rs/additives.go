@@ -27,7 +27,7 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 				err       error
 			)
 
-			category := strings.TrimSpace(r.URL.Query().Get("category"))
+			category := strings.TrimSpace(h.qvCache.Get(paramCategory))
 			if len(category) > 0 {
 				catId, err := strconv.Atoi(category)
 				if err != nil {
@@ -48,6 +48,29 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 				}
 				h.writeJson(additives)
 			}
+		}
+	}
+}
+
+func (api *RestApi) handleAdditivesSearch() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		h := newHandlerContext(api, slashAdditives, w, r)
+
+		keyword := strings.TrimSpace(h.qvCache.Get(paramKeyword))
+		if len(keyword) > 0 {
+			additives, err := api.provider.Additives.Search(keyword)
+			if err != nil {
+				h.writeError(err)
+				return
+			}
+
+			for _, a := range additives {
+				a.Url = h.relUrl(a.Code)
+			}
+
+			h.writeJson(additives)
+		} else {
+			h.writeJson(make([]interface{}, 0))
 		}
 	}
 }

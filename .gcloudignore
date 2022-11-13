@@ -23,6 +23,8 @@
 *.test
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+# backup crap
+.bak
 
 # Do not deploy web app work files, only the build
 ./www/
