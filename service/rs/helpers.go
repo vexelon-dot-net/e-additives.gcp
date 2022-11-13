@@ -53,9 +53,10 @@ func (h *HandlerContext) writeError(err error) {
 func (h *HandlerContext) writeJson(data interface{}) {
 	w := h.w
 	resp, _ := json.Marshal(data)
-	if h.qvCache.Has(paramJSONP) {
+	jsonp := h.qvCache.Get(paramJSONP)
+	if len(jsonp) > 0 {
 		var buf bytes.Buffer
-		buf.WriteString(h.qvCache.Get(paramJSONP))
+		buf.WriteString(jsonp)
 		buf.WriteString("(")
 		buf.Write(resp)
 		buf.WriteString(")")
