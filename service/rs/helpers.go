@@ -14,21 +14,26 @@ import (
 	"github.com/vexelon-dot-net/e-additives.gcp/db"
 )
 
-type MyRequest struct {
-	*http.Request
+type HandlerContext struct {
+	api     *RestApi
 	path    string
+	w       http.ResponseWriter
+	r       *http.Request
 	qvCache url.Values
 }
 
-type MyResponseWriter struct {
-	http.ResponseWriter
+func newHandlerContext(api *RestApi, path string, w http.ResponseWriter, r *http.Request) *HandlerContext {
+	return &HandlerContext{
+		api,
+		path,
+		w,
+		r,
+		r.URL.Query(),
+	}
 }
 
-func newMyResponseWriter(w http.ResponseWriter) *MyResponseWriter {
-	return &MyResponseWriter{w}
-}
-
-func (w *MyResponseWriter) writeError(err error) {
+func (h *HandlerContext) writeError(err error) {
+	w := h.w
 	if errors.Is(err, strconv.ErrSyntax) {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Printf("Error: %v\n", err)
@@ -44,31 +49,23 @@ func (w *MyResponseWriter) writeError(err error) {
 	}
 }
 
-func (w *MyResponseWriter) writeJson(data interface{}) {
+func (h *HandlerContext) writeJson(data interface{}) {
 	resp, _ := json.Marshal(data)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(resp)
+	h.w.Header().Set("Content-Type", "application/json")
+	h.w.Write(resp)
 }
 
-func newMyRequest(r *http.Request, path string) *MyRequest {
-	return &MyRequest{
-		r,
-		path,
-		r.URL.Query(),
-	}
-}
-
-func (r *MyRequest) pathParam() string {
-	urlPath := r.URL.Path
-	idx := strings.Index(urlPath, r.path)
+func (h *HandlerContext) pathParam() string {
+	urlPath := h.r.URL.Path
+	idx := strings.Index(urlPath, h.path)
 	if idx > -1 {
-		return strings.TrimPrefix(urlPath[idx+len(r.path)+1:], "/")
+		return strings.TrimPrefix(urlPath[idx+len(h.path)+1:], "/")
 	}
 	return ""
 }
 
-func (r *MyRequest) idParam() (int, error) {
-	key := r.pathParam()
+func (h *HandlerContext) idParam() (int, error) {
+	key := h.pathParam()
 	if len(key) > 0 {
 		id, err := strconv.Atoi(key)
 		if err != nil {
@@ -80,10 +77,10 @@ func (r *MyRequest) idParam() (int, error) {
 	return 0, nil
 }
 
-func (r *MyRequest) relUrl(id string) string {
-	return fmt.Sprintf("%s%s/%s", r.Referer(), r.path, id)
+func (h *HandlerContext) relUrl(id string) string {
+	return fmt.Sprintf("%s%s/%s", h.r.Referer(), h.path, id)
 }
 
-func (r *MyRequest) locale(api *RestApi) db.Locale {
-	return api.getLocale(r.qvCache.Get("locale"))
+func (h *HandlerContext) locale() db.Locale {
+	return h.api.getLocale(h.qvCache.Get(paramLocale))
 }

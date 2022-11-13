@@ -6,33 +6,32 @@ import (
 )
 
 func (api *RestApi) handleCategories() http.HandlerFunc {
-	return func(_w http.ResponseWriter, _r *http.Request) {
-		r := newMyRequest(_r, slashCategories)
-		w := newMyResponseWriter(_w)
+	return func(w http.ResponseWriter, r *http.Request) {
+		h := newHandlerContext(api, slashCategories, w, r)
 
-		id, err := r.idParam()
+		id, err := h.idParam()
 		if err != nil {
-			w.writeError(err)
+			h.writeError(err)
 			return
 		}
 
 		if id > 0 {
-			cat, err := api.provider.Additives.Categories.FetchOne(id, r.locale(api))
+			cat, err := api.provider.Additives.Categories.FetchOne(id, h.locale())
 			if err != nil {
-				w.writeError(err)
+				h.writeError(err)
 			} else {
-				cat.Url = r.relUrl(strconv.Itoa(cat.Category))
-				w.writeJson(cat)
+				cat.Url = h.relUrl(strconv.Itoa(cat.Category))
+				h.writeJson(cat)
 			}
 		} else {
-			categories, err := api.provider.Additives.Categories.FetchAll(r.locale(api))
+			categories, err := api.provider.Additives.Categories.FetchAll(h.locale())
 			if err != nil {
-				w.writeError(err)
+				h.writeError(err)
 			} else {
 				for _, cat := range categories {
-					cat.Url = r.relUrl(strconv.Itoa(cat.Category))
+					cat.Url = h.relUrl(strconv.Itoa(cat.Category))
 				}
-				w.writeJson(categories)
+				h.writeJson(categories)
 			}
 		}
 	}

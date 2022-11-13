@@ -9,18 +9,17 @@ import (
 )
 
 func (api *RestApi) handleAdditives() http.HandlerFunc {
-	return func(_w http.ResponseWriter, _r *http.Request) {
-		r := newMyRequest(_r, slashAdditives)
-		w := newMyResponseWriter(_w)
+	return func(w http.ResponseWriter, r *http.Request) {
+		h := newHandlerContext(api, slashAdditives, w, r)
 
-		code := r.pathParam()
+		code := h.pathParam()
 		if len(code) > 0 {
-			a, err := api.provider.Additives.FetchOne(code, r.locale(api))
+			a, err := api.provider.Additives.FetchOne(code, h.locale())
 			if err != nil {
-				w.writeError(err)
+				h.writeError(err)
 			} else {
-				a.Url = r.relUrl(a.Code)
-				w.writeJson(a)
+				a.Url = h.relUrl(a.Code)
+				h.writeJson(a)
 			}
 		} else {
 			var (
@@ -32,22 +31,22 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 			if len(category) > 0 {
 				catId, err := strconv.Atoi(category)
 				if err != nil {
-					w.writeError(err)
+					h.writeError(err)
 					return
 				}
-				additives, err = api.provider.Additives.FetchAllByCategory(catId, r.locale(api))
+				additives, err = api.provider.Additives.FetchAllByCategory(catId, h.locale())
 
 			} else {
-				additives, err = api.provider.Additives.FetchAll(r.locale(api))
+				additives, err = api.provider.Additives.FetchAll(h.locale())
 			}
 
 			if err != nil {
-				w.writeError(err)
+				h.writeError(err)
 			} else {
 				for _, a := range additives {
-					a.Url = r.relUrl(a.Code)
+					a.Url = h.relUrl(a.Code)
 				}
-				w.writeJson(additives)
+				h.writeJson(additives)
 			}
 		}
 	}

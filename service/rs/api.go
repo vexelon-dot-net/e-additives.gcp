@@ -12,6 +12,9 @@ const (
 	slashLocales    = slashIndex + "/locales"
 	slashCategories = slashIndex + "/categories"
 	slashAdditives  = slashIndex + "/additives"
+
+	paramJSONP  = "callback"
+	paramLocale = "locale"
 )
 
 type RestApi struct {
@@ -55,7 +58,7 @@ func (api *RestApi) getLocale(code string) db.Locale {
 
 func (api *RestApi) handleIndex() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		writer := &MyResponseWriter{w}
+		h := newHandlerContext(api, slashIndex, w, r)
 		routes := map[string]string{
 			slashIndex:                     "Fetches this list of junctions",
 			slashLocales:                   "Fetches list of locales",
@@ -64,6 +67,6 @@ func (api *RestApi) handleIndex() http.HandlerFunc {
 			slashAdditives:                 "Fetches list of additives",
 			slashAdditives + "/:code":      "Fetches a single additive by code",
 		}
-		writer.writeJson(routes)
+		h.writeJson(routes)
 	}
 }
