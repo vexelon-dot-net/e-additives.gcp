@@ -1,6 +1,7 @@
 package rs
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -50,16 +51,28 @@ func (h *HandlerContext) writeError(err error) {
 }
 
 func (h *HandlerContext) writeJson(data interface{}) {
+	w := h.w
 	resp, _ := json.Marshal(data)
-	h.w.Header().Set("Content-Type", "application/json")
-	h.w.Write(resp)
+	if h.qvCache.Has(paramJSONP) {
+		var buf bytes.Buffer
+		buf.WriteString(h.qvCache.Get(paramJSONP))
+		buf.WriteString("(")
+		buf.Write(resp)
+		buf.WriteString(")")
+
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write(buf.Bytes())
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resp)
+	}
 }
 
 func (h *HandlerContext) pathParam() string {
 	urlPath := h.r.URL.Path
 	idx := strings.Index(urlPath, h.path)
 	if idx > -1 {
-		return strings.TrimPrefix(urlPath[idx+len(h.path)+1:], "/")
+		return strings.TrimPrefix(urlPath[idx+len(h.path):], "/")
 	}
 	return ""
 }
