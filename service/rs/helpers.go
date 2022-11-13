@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -15,11 +16,16 @@ import (
 
 type MyRequest struct {
 	*http.Request
-	junction string
+	path    string
+	qvCache url.Values
 }
 
 type MyResponseWriter struct {
 	http.ResponseWriter
+}
+
+func newMyResponseWriter(w http.ResponseWriter) *MyResponseWriter {
+	return &MyResponseWriter{w}
 }
 
 func (w *MyResponseWriter) writeError(err error) {
@@ -44,8 +50,21 @@ func (w *MyResponseWriter) writeJson(data interface{}) {
 	w.Write(resp)
 }
 
+func newMyRequest(r *http.Request, path string) *MyRequest {
+	return &MyRequest{
+		r,
+		path,
+		r.URL.Query(),
+	}
+}
+
 func (r *MyRequest) pathParam() string {
-	return strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, r.junction), "/")
+	urlPath := r.URL.Path
+	idx := strings.Index(urlPath, r.path)
+	if idx > -1 {
+		return strings.TrimPrefix(urlPath[idx+len(r.path)+1:], "/")
+	}
+	return ""
 }
 
 func (r *MyRequest) idParam() (int, error) {
@@ -62,9 +81,9 @@ func (r *MyRequest) idParam() (int, error) {
 }
 
 func (r *MyRequest) relUrl(id string) string {
-	return fmt.Sprintf("%s%s/%s", r.Referer(), r.junction, id)
+	return fmt.Sprintf("%s%s/%s", r.Referer(), r.path, id)
 }
 
 func (r *MyRequest) locale(api *RestApi) db.Locale {
-	return api.getLocale(r.URL.Query().Get("locale"))
+	return api.getLocale(r.qvCache.Get("locale"))
 }

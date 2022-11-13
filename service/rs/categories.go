@@ -7,8 +7,8 @@ import (
 
 func (api *RestApi) handleCategories() http.HandlerFunc {
 	return func(_w http.ResponseWriter, _r *http.Request) {
-		r := &MyRequest{_r, slashCategories}
-		w := &MyResponseWriter{_w}
+		r := newMyRequest(_r, slashCategories)
+		w := newMyResponseWriter(_w)
 
 		id, err := r.idParam()
 		if err != nil {

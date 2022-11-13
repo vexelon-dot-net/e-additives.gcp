@@ -6,8 +6,8 @@ import (
 
 func (api *RestApi) handleLocales() http.HandlerFunc {
 	return func(_w http.ResponseWriter, _r *http.Request) {
-		r := &MyRequest{_r, slashLocales}
-		w := &MyResponseWriter{_w}
+		r := newMyRequest(_r, slashLocales)
+		w := newMyResponseWriter(_w)
 
 		code := r.pathParam()
 		if len(code) > 0 {

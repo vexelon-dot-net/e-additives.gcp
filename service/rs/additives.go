@@ -10,8 +10,8 @@ import (
 
 func (api *RestApi) handleAdditives() http.HandlerFunc {
 	return func(_w http.ResponseWriter, _r *http.Request) {
-		r := &MyRequest{_r, slashAdditives}
-		w := &MyResponseWriter{_w}
+		r := newMyRequest(_r, slashAdditives)
+		w := newMyResponseWriter(_w)
 
 		code := r.pathParam()
 		if len(code) > 0 {
