@@ -3,7 +3,6 @@ package rs
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/vexelon-dot-net/e-additives.gcp/db"
 )
@@ -47,12 +46,9 @@ func AttachRestApi(router *http.ServeMux, provider *db.DBProvider) error {
 }
 
 func (api *RestApi) getLocale(code string) db.Locale {
-	//code := r.URL.Query().Get("locale")
-	if len(code) > 0 {
-		loc, ok := api.locales[strings.TrimSpace(code)]
-		if ok {
-			return *loc
-		}
+	loc, ok := api.locales[code]
+	if ok {
+		return *loc
 	}
 	return api.defaultLocale
 }
