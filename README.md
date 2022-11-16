@@ -23,6 +23,10 @@ To build and deploy locally at `http://localhost:8080/api` run:
 
     DEVMODE=1 PORT=8080 DB_PATH=./data/eadditives.sqlite3 go run main.go
 
+To run with full-text search support use the following tags:
+
+    go run -tags "eadfts,fts5"  main.go 
+
 To build and deploy on GCP run:
 
     gcloud app deploy
