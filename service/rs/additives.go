@@ -58,7 +58,7 @@ func (api *RestApi) handleAdditivesSearch() http.HandlerFunc {
 
 		keyword := strings.TrimSpace(h.qvCache.Get(paramKeyword))
 		if len(keyword) > 0 {
-			additives, err := api.provider.Additives.Search(keyword)
+			additives, err := api.provider.Additives.Search(keyword, h.locale())
 			if err != nil {
 				h.writeError(err)
 				return
