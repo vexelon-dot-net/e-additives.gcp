@@ -8,6 +8,11 @@ func (api *RestApi) handleLocales() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		h := newHandlerContext(api, slashLocales, w, r)
 
+		if err := h.verifyAuth(); err != nil {
+			h.writeError(err)
+			return
+		}
+
 		code := h.pathParam()
 		if len(code) > 0 {
 			loc, err := api.provider.Locales.FetchOne(code)

@@ -23,6 +23,8 @@ type HandlerContext struct {
 	qvCache url.Values
 }
 
+var ApiUnauthorizedError = errors.New("invalid API authorization")
+
 func newHandlerContext(api *RestApi, path string, w http.ResponseWriter, r *http.Request) *HandlerContext {
 	return &HandlerContext{
 		api,
@@ -31,6 +33,27 @@ func newHandlerContext(api *RestApi, path string, w http.ResponseWriter, r *http
 		r,
 		r.URL.Query(),
 	}
+}
+
+func (h *HandlerContext) verifyAuth() error {
+	r := h.r
+
+	auth := r.Header.Get("Authorization")
+	if auth == "" {
+		return fmt.Errorf("missing authorization header: %w", ApiUnauthorizedError)
+	}
+
+	needle := strings.Index(auth, "Bearer")
+	if needle == -1 {
+		return fmt.Errorf("missing header bearer part: %w", ApiUnauthorizedError)
+	}
+
+	key := strings.TrimSpace(auth[needle+6:])
+	if key != "abrakadabra" {
+		return fmt.Errorf("unknown API key: %w", ApiUnauthorizedError)
+	}
+
+	return nil
 }
 
 func (h *HandlerContext) writeError(err error) {
@@ -43,6 +66,9 @@ func (h *HandlerContext) writeError(err error) {
 		w.WriteHeader(http.StatusNotFound)
 		// fmt.Fprintf(w, "Error: %v", err)
 		fmt.Fprintf(w, "%s", http.StatusText(http.StatusNotFound))
+	} else if errors.Is(err, ApiUnauthorizedError) {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "%s", http.StatusText(http.StatusUnauthorized))
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("Error: %v\n", err)

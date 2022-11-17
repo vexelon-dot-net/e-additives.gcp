@@ -12,6 +12,11 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		h := newHandlerContext(api, slashAdditives, w, r)
 
+		if err := h.verifyAuth(); err != nil {
+			h.writeError(err)
+			return
+		}
+
 		code := h.pathParam()
 		if len(code) > 0 {
 			a, err := api.provider.Additives.FetchOne(code, h.locale())
@@ -55,6 +60,11 @@ func (api *RestApi) handleAdditives() http.HandlerFunc {
 func (api *RestApi) handleAdditivesSearch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		h := newHandlerContext(api, slashAdditives, w, r)
+
+		if err := h.verifyAuth(); err != nil {
+			h.writeError(err)
+			return
+		}
 
 		keyword := strings.TrimSpace(h.qvCache.Get(paramKeyword))
 		if len(keyword) > 0 {

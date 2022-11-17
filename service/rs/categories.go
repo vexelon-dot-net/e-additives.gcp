@@ -9,6 +9,11 @@ func (api *RestApi) handleCategories() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		h := newHandlerContext(api, slashCategories, w, r)
 
+		if err := h.verifyAuth(); err != nil {
+			h.writeError(err)
+			return
+		}
+
 		id, err := h.idParam()
 		if err != nil {
 			h.writeError(err)
