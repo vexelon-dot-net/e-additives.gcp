@@ -12,6 +12,7 @@ type DBChannel struct {
 }
 
 type DBProvider struct {
+	ApiKeys   apiKeysChannel
 	Locales   localesChannel
 	Additives additivesChannel
 }
@@ -52,6 +53,7 @@ func NewProvider(path string) (provider *DBProvider, err error) {
 	}
 
 	provider = &DBProvider{
+		ApiKeys: apiKeysChannel{DBChannel{sqlDB}},
 		Locales: localesChannel{DBChannel{sqlDB}},
 		Additives: additivesChannel{
 			DBChannel:  DBChannel{sqlDB},
