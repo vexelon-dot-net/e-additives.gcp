@@ -78,7 +78,6 @@ func (api *RestApi) getLocale(code string) db.Locale {
 
 func (api *RestApi) isValidApiKey(key string, host string) bool {
 	apiKey, ok := api.apiKeys[key]
-	fmt.Printf("APIK: %s \n", key)
 	if ok {
 		return apiKey.Host == "*" || strings.EqualFold(apiKey.Host, host)
 	}

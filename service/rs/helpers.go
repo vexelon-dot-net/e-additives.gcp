@@ -49,16 +49,13 @@ func (h *HandlerContext) verifyAuth() error {
 		return fmt.Errorf("missing header bearer part: %w", ApiUnauthorizedError)
 	}
 	key := strings.TrimSpace(auth[needle+6:])
-	fmt.Println(key)
 
 	// strip port number, if any
-	fmt.Println(r.Host)
 	host := r.Host
 	needle = strings.Index(host, ":")
 	if needle != -1 {
 		host = host[:needle]
 	}
-	fmt.Println(host)
 
 	if !h.api.isValidApiKey(key, host) {
 		return fmt.Errorf("invalid API key: %w", ApiUnauthorizedError)
