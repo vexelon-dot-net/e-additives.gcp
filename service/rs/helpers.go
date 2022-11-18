@@ -44,11 +44,11 @@ func (h *HandlerContext) verifyAuth() error {
 	}
 
 	// extract only the key part
-	_, after, ok := strings.Cut(auth, "Bearer")
-	if !ok {
+	needle := strings.Index(auth, "Bearer")
+	if needle == -1 {
 		return fmt.Errorf("missing header bearer part: %w", ApiUnauthorizedError)
 	}
-	key := strings.TrimSpace(after)
+	key := strings.TrimSpace(auth[needle+6:])
 
 	// strip port number, if any
 	host := r.Host
