@@ -9,12 +9,16 @@ handlers:
 - url: /
   static_files: www/build/index.html
   upload: www/build/index.html
-
-- url: /api(.*)
   secure: always
   redirect_http_response_code: 301
+
+- url: /api(.*)
   script: auto
+  secure: always
+  redirect_http_response_code: 301
 
 - url: /(.*)
   static_files: www/build/\1
   upload: www/build/(.*)
+  secure: always
+  redirect_http_response_code: 301
