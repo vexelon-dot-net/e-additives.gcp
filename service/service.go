@@ -11,12 +11,12 @@ import (
 )
 
 type Service struct {
-	config   *config.Config
+	config   config.Config
 	router   *http.ServeMux
 	provider *db.DBProvider
 }
 
-func New(config *config.Config) Service {
+func New(config config.Config) Service {
 	return Service{
 		config,
 		http.NewServeMux(),
