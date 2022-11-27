@@ -10,21 +10,21 @@ import (
 	"github.com/vexelon-dot-net/e-additives.gcp/service/www"
 )
 
-type ServerContext struct {
+type Service struct {
 	config   *config.Config
 	router   *http.ServeMux
 	provider *db.DBProvider
 }
 
-func NewServer(config *config.Config) *ServerContext {
-	return &ServerContext{
+func New(config *config.Config) Service {
+	return Service{
 		config,
 		http.NewServeMux(),
 		nil,
 	}
 }
 
-func (sc *ServerContext) Run() (err error) {
+func (sc *Service) Run() (err error) {
 	if sc.provider, err = db.NewProvider(sc.config.DatabasePath); err != nil {
 		return err
 	}

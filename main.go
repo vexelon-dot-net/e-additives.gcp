@@ -23,8 +23,8 @@ func main() {
 		fmt.Println("DEV mode enabled.")
 	}
 
-	server := service.NewServer(config)
-	if err := server.Run(); err != nil {
-		log.Fatalf("Server error: %v\n", err)
+	service := service.New(config)
+	if err := service.Run(); err != nil {
+		log.Fatalf("Service run error: %v\n", err)
 	}
 }
